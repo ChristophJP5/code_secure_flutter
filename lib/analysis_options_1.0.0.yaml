@@ -304,7 +304,7 @@ custom_lint:
       function_max_char_count: 1100
     - avoid_nesting:
       nesting_max_depth: 2
-    - parameter_assert_required:
+    - require_parameter_assert:
       exclude_parameter_types: 
         - WidgetRef
         - WidgetRef?

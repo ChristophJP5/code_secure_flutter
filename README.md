@@ -90,7 +90,7 @@ My package comes with the following rules:
 | [avoid_recursion](lib/rules/avoid_recursion_rule.dart) | Flags recursive methods. | WARNING |
 | [check_return_value](lib/rules/check_return_value_rule.dart) | Makes sure you don't ignore return values. They have feelings too. | ERROR |
 | [loops_require_fixed_bound](lib/rules/loops_require_fixed_bound_rule.dart) | Ensures loops have a fixed bound to prevent infinite loops. | ERROR |
-| [parameter_assert_required](lib/rules/parameter_assert_required_rule.dart) | Enforces parameter validation through assertions. Trust no one, not even your own parameters. | ERROR |
+| [require_parameter_assert](lib/rules/require_parameter_assert_rule.dart) | Enforces parameter validation through assertions. Trust no one, not even your own parameters. | ERROR |
 | [prefer_local_variable_for_single_method_instance_field](lib/rules/prefer_local_variable_for_single_method_instance_field_rule.dart) | Suggests using local variables when fields are only used in one method. Some things should be together, like me and my wife. | WARNING |
 | [pure_build_methods](lib/rules/pure_build_methods_rule.dart) | Ensures build methods don't have side effects. If you still have Side effects, contact your doctor for counseling | ERROR |
 | [require_mounted_check_in_async_callbacks](lib/rules/require_mounted_check_in_async_callbacks_rule.dart) | Requires mounted checks in async callbacks to prevent setState after dispose. Cause calling setState after dispose, is like calling your ex - technically possible but never a good idea. | ERROR |
@@ -332,13 +332,13 @@ void boundedLoop() {
 }
 ```
 
-#### parameter_assert_required
+#### require_parameter_assert
 
 **Configuration in `analysis_options.yaml`:**
 ```yaml
 custom_lint:
   rules:
-    - parameter_assert_required:
+    - require_parameter_assert:
         error_severity: Error
 ```
 

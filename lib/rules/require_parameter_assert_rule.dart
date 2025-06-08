@@ -19,7 +19,7 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// ```yaml
 /// custom_lint:
 ///   rules:
-///     - parameter_assert_required:
+///     - require_parameter_assert:
 ///         error_severity: Error
 /// ```
 ///
@@ -55,11 +55,11 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 ///   }
 /// }
 /// ```
-class ParameterAssertRequiredRule extends CustomRule {
-  /// Constructor for the [ParameterAssertRequiredRule].
-  ParameterAssertRequiredRule({
+class RequireParameterAssertRule extends CustomRule {
+  /// Constructor for the [RequireParameterAssertRule].
+  RequireParameterAssertRule({
     required super.configs,
-    super.ruleName = "parameter_assert_required",
+    super.ruleName = "require_parameter_assert",
     super.ruleProblemMessage =
         "Parameter should have a 'assert' statement for validation check.",
     super.correctionMessage =
@@ -75,6 +75,8 @@ class ParameterAssertRequiredRule extends CustomRule {
     "WidgetRef?",
     "BuildContext",
     "BuildContext?",
+    "VoidCallback",
+    "VoidCallback?",
   ];
 
   @override
@@ -155,24 +157,38 @@ class ParameterAssertRequiredRule extends CustomRule {
       }
     }
 
-    if (body is! BlockFunctionBody) {
-      validateParameters();
-      return;
-    }
-
-    final blockFunctionBody = body;
+    // Check constructor initializers for assert statements
     final assertedParameterNames = <String>{};
-    for (final statement in blockFunctionBody.block.statements) {
-      if (statement is! AssertStatement) {
-        continue;
+    
+    // Check initializers if this is a constructor declaration
+    if (node is ConstructorDeclaration && node.initializers.isNotEmpty) {
+      for (final initializer in node.initializers) {
+        if (initializer is AssertInitializer) {
+          // final condition = initializer;
+          final identifierVisitor = _IdentifierVisitor();
+          initializer.accept(identifierVisitor);
+          
+          for (final paramId in identifierVisitor.identifiers) {
+            assertedParameterNames.add(paramId.name);
+          }
+        }
       }
+    }
+    
+    // Check function body for assert statements
+    if (body is BlockFunctionBody) {
+      for (final statement in body.block.statements) {
+        if (statement is! AssertStatement) {
+          continue;
+        }
 
-      final condition = statement.condition;
-      final identifierVisitor = _IdentifierVisitor();
-      condition.accept(identifierVisitor);
+        final condition = statement.condition;
+        final identifierVisitor = _IdentifierVisitor();
+        condition.accept(identifierVisitor);
 
-      for (final paramId in identifierVisitor.identifiers) {
-        assertedParameterNames.add(paramId.name);
+        for (final paramId in identifierVisitor.identifiers) {
+          assertedParameterNames.add(paramId.name);
+        }
       }
     }
 
