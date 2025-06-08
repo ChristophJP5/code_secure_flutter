@@ -28,9 +28,9 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// class UserWidget extends StatelessWidget {
 ///   final String username;
 ///   final int age;
-///   
+///
 ///   const UserWidget({required this.username, required this.age});
-///   
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     // No parameter validation
@@ -44,11 +44,11 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// class UserWidget extends StatelessWidget {
 ///   final String username;
 ///   final int age;
-///   
+///
 ///   const UserWidget({required this.username, required this.age})
 ///     : assert(username.isNotEmpty, 'Username cannot be empty'),
 ///       assert(age > 0, 'Age must be positive');
-///   
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Text('$username: $age');
@@ -56,7 +56,6 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// }
 /// ```
 class ParameterAssertRequiredRule extends CustomRule {
-  
   /// Constructor for the [ParameterAssertRequiredRule].
   ParameterAssertRequiredRule({
     required super.configs,
@@ -238,10 +237,10 @@ assert($parameterName < ${parameterName}MaxValue, "$parameterName must be less t
     AnalysisError analysisError,
     List<AnalysisError> others,
   ) {
-    context.registry.addFunctionDeclaration((node) {
+    context.registry.addConstructorDeclaration((node) {
       _addDeclarationListener(
-        node.functionExpression.body,
-        node.name,
+        node.body,
+        node.name ?? Token(TokenType.EOF, 0),
         node.declaredElement,
         reporter,
         analysisError,
