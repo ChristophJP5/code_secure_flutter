@@ -75,8 +75,6 @@ class RequireParameterAssertRule extends CustomRule {
     "WidgetRef?",
     "BuildContext",
     "BuildContext?",
-    "VoidCallback",
-    "VoidCallback?",
   ];
 
   @override
@@ -126,8 +124,16 @@ class RequireParameterAssertRule extends CustomRule {
         if (_excludeParameterName.contains(parameterName)) {
           continue;
         }
-
         final parameterType = parameter.declaredElement?.type.toString();
+        if (parameter.declaredElement?.type.isDartCoreFunction ?? false) {
+          continue;
+        }
+        if (parameter.declaredElement?.type.isDartAsyncFuture ?? false) {
+          continue;
+        }
+        if (parameter.declaredElement?.type.isDartAsyncFutureOr ?? false) {
+          continue;
+        }
         if (_excludeParameterType.contains(parameterType)) {
           continue;
         }
@@ -159,7 +165,7 @@ class RequireParameterAssertRule extends CustomRule {
 
     // Check constructor initializers for assert statements
     final assertedParameterNames = <String>{};
-    
+
     // Check initializers if this is a constructor declaration
     if (node is ConstructorDeclaration && node.initializers.isNotEmpty) {
       for (final initializer in node.initializers) {
@@ -167,14 +173,14 @@ class RequireParameterAssertRule extends CustomRule {
           // final condition = initializer;
           final identifierVisitor = _IdentifierVisitor();
           initializer.accept(identifierVisitor);
-          
+
           for (final paramId in identifierVisitor.identifiers) {
             assertedParameterNames.add(paramId.name);
           }
         }
       }
     }
-    
+
     // Check function body for assert statements
     if (body is BlockFunctionBody) {
       for (final statement in body.block.statements) {
