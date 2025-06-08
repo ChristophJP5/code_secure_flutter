@@ -39,7 +39,6 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// }
 /// ```
 class CheckReturnValueRule extends CustomRule {
-  
   /// Constructor for the [CheckReturnValueRule].
   CheckReturnValueRule({
     required super.configs,
@@ -158,7 +157,12 @@ class CheckReturnValueRule extends CustomRule {
       }
 
       final methodName = invocation.methodName.name;
-      final root = body.childEntities.first as Block;
+      final root =
+          body.childEntities.firstWhereOrNull((entity) => entity is Block)
+              as Block?;
+      if (root == null) {
+        return;
+      }
       final variableDeclaration = root.childEntities
           .whereType<VariableDeclarationStatement>()
           .firstWhereOrNull((variable) {

@@ -75,6 +75,8 @@ class RequireParameterAssertRule extends CustomRule {
     "WidgetRef?",
     "BuildContext",
     "BuildContext?",
+    "void Function()",
+    "void Function()?",
   ];
 
   @override
@@ -250,11 +252,41 @@ assert($parameterName < ${parameterName}MaxValue, "$parameterName must be less t
     }
   }
 
+  String generateConstructorAssertCheck(
+    String parameterName,
+    String parameterType,
+  ) {
+    if (parameterName.startsWith("List<") ||
+        parameterName.startsWith("Map<") ||
+        parameterName.startsWith("Set<")) {
+      return 'assert($parameterName.isNotEmpty, "$parameterName must not be empty, is: \$$parameterName")';
+    }
+    switch (parameterType) {
+      case "DateTime":
+        return """
+assert($parameterName.isAfter(DateTime(1970)), "$parameterName must be after \$DateTime(1970), is: \$$parameterName"),
+assert($parameterName.isBefore(DateTime.now()), "$parameterName must be before \$DateTime.now(), is: \$$parameterName")
+""";
+      case "int":
+        return """
+assert($parameterName > 0, "$parameterName must be greater than 0, is: \$$parameterName"),
+assert($parameterName < 0x20000000000000, "$parameterName must be less than 0x20000000000000, is: \$$parameterName")""";
+      case "double":
+        return """
+assert($parameterName > 0, "$parameterName must be greater than 0, is: \$$parameterName"),
+assert($parameterName < double.maxFinite, "$parameterName must be less than double.maxFinite, is: \$$parameterName")
+""";
+      case "String":
+        return 'assert($parameterName.isNotEmpty, "$parameterName must not be empty, is: \$$parameterName")';
+      default:
+        return 'assert($parameterName != null, "$parameterName must not be null, is: \$$parameterName")';
+    }
+  }
+
   @override
   void run(
     CustomLintResolver resolver,
     ChangeReporter reporter,
-
     CustomLintContext context,
     AnalysisError analysisError,
     List<AnalysisError> others,
@@ -264,6 +296,7 @@ assert($parameterName < ${parameterName}MaxValue, "$parameterName must be less t
         node.body,
         node.name ?? Token(TokenType.EOF, 0),
         node.declaredElement,
+        node,
         reporter,
         analysisError,
       );
@@ -273,6 +306,7 @@ assert($parameterName < ${parameterName}MaxValue, "$parameterName must be less t
         node.body,
         node.name,
         node.declaredElement,
+        node,
         reporter,
         analysisError,
       );
@@ -282,6 +316,7 @@ assert($parameterName < ${parameterName}MaxValue, "$parameterName must be less t
         node.functionExpression.body,
         node.name,
         node.declaredElement,
+        node,
         reporter,
         analysisError,
       );
@@ -292,6 +327,7 @@ assert($parameterName < ${parameterName}MaxValue, "$parameterName must be less t
     FunctionBody body,
     Token name,
     ExecutableElement? declaredElement,
+    AstNode node,
     ChangeReporter reporter,
     AnalysisError analysisError,
   ) {
@@ -330,16 +366,27 @@ assert($parameterName < ${parameterName}MaxValue, "$parameterName must be less t
           if (body is BlockFunctionBody) {
             builder.addSimpleInsertion(
               body.block.leftBracket.end,
-              "\n  ${generateAssertCheck(parameterName, parameterType)}\n",
+              "\n  ${generateAssertCheck(parameterName, parameterType)}",
             );
           } else if (body is ExpressionFunctionBody) {
             // need to convert to a function with a block body to use assert
             final expression = body.expression;
             final bodyText =
-                " {\n  ${generateAssertCheck(parameterName, parameterType)}\n  return ${expression.toSource()};\n}";
+                " {\n  ${generateAssertCheck(parameterName, parameterType)}  return ${expression.toSource()};\n}";
             builder.addSimpleReplacement(
               SourceRange(body.offset, body.length),
               bodyText,
+            );
+          } else {
+            var prefix = ":";
+            if (node is ConstructorDeclaration &&
+                node.initializers.any((e) => e is AssertInitializer)) {
+              prefix = ", \n";
+            }
+
+            builder.addSimpleInsertion(
+              body.endToken.offset,
+              "$prefix${generateConstructorAssertCheck(parameterName, parameterType)}",
             );
           }
         });

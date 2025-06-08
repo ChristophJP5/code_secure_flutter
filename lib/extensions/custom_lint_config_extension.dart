@@ -64,9 +64,9 @@ extension CustomLintConfigExtension on CustomLintConfigs {
       "error_severity",
       ErrorSeverity.values,
     );
-    print(
-      "CustomLintConfigExtension.getErrorSeverity: $ruleName -> $enumValue",
-    );
+    // print(
+    //   "CustomLintConfigExtension.getErrorSeverity: $ruleName -> $enumValue",
+    // );
     return enumValue;
   }
 

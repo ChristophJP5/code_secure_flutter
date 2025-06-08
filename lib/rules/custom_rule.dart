@@ -24,6 +24,7 @@ abstract class CustomRule extends DartLintRule {
   /// Configuration for the lint rule.
   final CustomLintConfigs configs;
 
+  /// generates a [LintCode] instance based on the provided parameters.
   LintCode createLintCode({
     String? name,
     String? problemMessage,

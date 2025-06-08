@@ -50,18 +50,18 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 ///       continue; // limit processing to items less than 100
 ///     }
 ///     if (item.isEven) {
-///       
+///
 ///     }
 ///   }
 /// }
 /// ```
 class AvoidNestingRule extends CustomRule {
-  
   /// Constructor for the [AvoidNestingRule].
   AvoidNestingRule({
     required super.configs,
     super.ruleName = "avoid_nesting",
-    super.ruleProblemMessage = "Avoid to deeply nested structures in functions and methods.",
+    super.ruleProblemMessage =
+        "Avoid to deeply nested structures in functions and methods.",
   });
 
   @override
@@ -120,7 +120,10 @@ Nesting depth is ${depth - defaultRemoveValue}, maximum allowed is ${nestingMaxD
 }
 
 class _NestingVisitor extends RecursiveAstVisitor<void> {
-  _NestingVisitor({required this.nestingMaxDepth, required this.onNestingDetected});
+  _NestingVisitor({
+    required this.nestingMaxDepth,
+    required this.onNestingDetected,
+  });
 
   final int nestingMaxDepth;
   final void Function(AstNode, int depth) onNestingDetected;
@@ -167,4 +170,3 @@ class _NestingVisitor extends RecursiveAstVisitor<void> {
     _currentDepth--;
   }
 }
-
