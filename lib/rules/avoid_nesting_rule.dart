@@ -9,6 +9,52 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// This rule checks for function and method declarations that contain
 /// nested blocks, if statements, for loops, and while loops that exceed a
 /// specified maximum nesting depth.
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - avoid_nesting:
+///         error_severity: Warning
+///         max_nesting_level: 3
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// void processData(List<int> items) {
+///   if (items.isNotEmpty) {
+///     for (var item in items) {
+///       if (item > 0) {
+///         if (item % 2 == 0) {
+///           if (item < 100) {
+///             // Too many nesting levels
+///           }
+///         }
+///       }
+///     }
+///   }
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// void processData(List<int> items) {
+///   if (items.isEmpty) {
+///     return;
+///   }
+///   for (var item in items) {
+///     if (item <= 0) {
+///       continue; // Skip non-positive items
+///     }
+///     if (item >= 100) {
+///       continue; // limit processing to items less than 100
+///     }
+///     if (item.isEven) {
+///       
+///     }
+///   }
+/// }
+/// ```
 class AvoidNestingRule extends CustomRule {
   
   /// Constructor for the [AvoidNestingRule].
@@ -121,3 +167,4 @@ class _NestingVisitor extends RecursiveAstVisitor<void> {
     _currentDepth--;
   }
 }
+

@@ -7,6 +7,41 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// A lint that forbids side effects in widget `build` methods.
 /// This rule checks for asynchronous operations and method invocations
 /// that return `Future` or `Stream` types within the `build` method of Flutter widgets.
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - pure_build_methods:
+///         error_severity: Error
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// class MyWidget extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     analytics.logScreenView(name: 'MyWidget'); // Side effect
+///     return Text('Hello World');
+///   }
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// class MyWidget extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Text('Hello World');
+///   }
+///   
+///   @override
+///   void didChangeDependencies() {
+///     super.didChangeDependencies();
+///     analytics.logScreenView(name: 'MyWidget');
+///   }
+/// }
+/// ```
 class PureBuildMethodsRule extends CustomRule {
   /// Creates a new instance of [PureBuildMethodsRule].
   PureBuildMethodsRule({

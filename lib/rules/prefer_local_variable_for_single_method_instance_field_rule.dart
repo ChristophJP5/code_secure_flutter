@@ -7,6 +7,39 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// Lint Rule to encourage local variables for instance fields used in only one method.
 /// This rule checks for instance fields that are used in exactly one other
 /// instance method of the class, suggesting
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - prefer_local_variable_for_single_method_instance_field:
+///         error_severity: Warning
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// class ProfileScreen extends StatelessWidget {
+///   final String _formattedDate = DateFormat.yMd().format(DateTime.now());
+///   
+///   @override
+///   Widget build(BuildContext context) {
+///     // _formattedDate only used here
+///     return Text('Date: $_formattedDate');
+///   }
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// class ProfileScreen extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     final now = DateTime.now();
+///     final formattedDate = DateFormat.yMd().format(now);
+///     return Text('Date: $formattedDate');
+///   }
+/// }
+/// ```
 class PreferLocalVariableForSingleMethodInstanceFieldRule extends CustomRule {
   /// Constructor for the [PreferLocalVariableForSingleMethodInstanceFieldRule].
   PreferLocalVariableForSingleMethodInstanceFieldRule({

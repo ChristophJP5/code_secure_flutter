@@ -7,6 +7,37 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// Lint Rule to ensure loops have a fixed bound to avoid infinite loops.
 /// This rule checks for `while` and `do` loops in function, method, and constructor declarations.
 /// It requires that the loop condition is a fixed bound, such as a comparison with an integer literal.
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - loops_require_fixed_bound:
+///         error_severity: Error
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// void infiniteLoop() {
+///   while (true) {
+///     // This could run forever
+///     doSomething();
+///   }
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// void boundedLoop() {
+///   final maxIterations = 100;
+///   int i = 0;
+///   
+///   while (i < maxIterations && !isDone()) {
+///     doSomething();
+///     i++;
+///   }
+/// }
+/// ```
 class LoopsRequireFixedBoundRule extends CustomRule {
   
   /// Constructor for the [LoopsRequireFixedBoundRule].

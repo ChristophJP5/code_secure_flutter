@@ -13,6 +13,47 @@ const _stateChecker = TypeChecker.fromName("State", packageName: "flutter");
 /// A lint that requires a `mounted` check for operations after an `await`.
 /// This rule checks for asynchronous methods in classes that extend `State`
 /// and ensures that any calls to `setState`, `context`, or similar operations
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - require_mounted_check_in_async_callbacks:
+///         error_severity: Error
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// class MyWidget extends StatefulWidget {
+///   @override
+///   void initState() {
+///     super.initState();
+///     fetchData().then((_) {
+///       setState(() { // No mounted check before setState
+///         isLoaded = true;
+///       });
+///     });
+///   }
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// class MyWidget extends StatefulWidget {
+///   @override
+///   void initState() {
+///     super.initState();
+///     fetchData().then((_) {
+///       if (!mounted) { 
+///         return;
+///       }
+///       setState(() {
+///         isLoaded = true;
+///       });
+///     });
+///   }
+/// }
+/// ```
 class RequireMountedCheckInAsyncCallbacksRule extends CustomRule {
   /// Creates a new instance of [RequireMountedCheckInAsyncCallbacksRule].
   RequireMountedCheckInAsyncCallbacksRule({

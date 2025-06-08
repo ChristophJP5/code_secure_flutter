@@ -7,6 +7,33 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// This rule checks for function and method declarations that call themselves
 /// or their own class methods, which can lead to complex flow constructs and
 /// potential stack overflow issues if not handled properly.
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - avoid_recursion:
+///         error_severity: Warning
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// int factorial(int n) {
+///   if (n <= 1) return 1;
+///   return n * factorial(n - 1); // Recursive call
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// int factorial(int n) {
+///   int result = 1;
+///   for (int i = 2; i <= n; i++) {
+///     result *= i;
+///   }
+///   return result;
+/// }
+/// ```
 class AvoidRecursionRule extends CustomRule {
   
   /// Constructor for the [AvoidRecursionRule].

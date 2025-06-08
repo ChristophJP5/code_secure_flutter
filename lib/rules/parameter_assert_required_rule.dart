@@ -14,6 +14,47 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// It requires at least one 'assert' statement or a custom validation check for each parameter.
 /// If a parameter is not validated, it reports a ERROR with a suggestion to add an assertion.
 /// It also provides a fix to automatically add an assertion based on the parameter type.
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - parameter_assert_required:
+///         error_severity: Error
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// class UserWidget extends StatelessWidget {
+///   final String username;
+///   final int age;
+///   
+///   const UserWidget({required this.username, required this.age});
+///   
+///   @override
+///   Widget build(BuildContext context) {
+///     // No parameter validation
+///     return Text('$username: $age');
+///   }
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// class UserWidget extends StatelessWidget {
+///   final String username;
+///   final int age;
+///   
+///   const UserWidget({required this.username, required this.age})
+///     : assert(username.isNotEmpty, 'Username cannot be empty'),
+///       assert(age > 0, 'Age must be positive');
+///   
+///   @override
+///   Widget build(BuildContext context) {
+///     return Text('$username: $age');
+///   }
+/// }
+/// ```
 class ParameterAssertRequiredRule extends CustomRule {
   
   /// Constructor for the [ParameterAssertRequiredRule].

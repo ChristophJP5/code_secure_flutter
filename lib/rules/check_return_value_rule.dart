@@ -11,6 +11,33 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// Lint Rule to ensure that the return value of all non-void functions is checked or cast to void.
 /// This rule checks for function, method, and constructor declarations.
 /// It requires that the return value of non-void functions is either checked or cast to void.
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - check_return_value:
+///         error_severity: Error
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// void processFile() {
+///   final content = file.readAsString(); // Return value ignored
+///   doSomethingElse(content);
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// Future<void> processFile() async {
+///   final content = await file.readAsString();
+///   if (content.isEmpty) {
+///     throw Exception('File is empty');
+///   }
+///   doSomethingElse();
+/// }
+/// ```
 class CheckReturnValueRule extends CustomRule {
   
   /// Constructor for the [CheckReturnValueRule].

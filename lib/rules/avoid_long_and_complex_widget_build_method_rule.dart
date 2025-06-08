@@ -13,6 +13,62 @@ const _widgetCheckerForComplexity = TypeChecker.any([
 /// A lint that flags `build` methods that are too complex.
 /// This rule checks for the number of lines and nesting depth in the `build` method of Flutter widgets.
 /// It helps maintain readability and manageability of widget build methods by enforcing limits on their complexity.
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - avoid_long_and_complex_widget_build_method:
+///         error_severity: Warning
+///         build_method_max_char_count: 800
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('My Screen'),
+///       // Many widgets and complex logic in one method
+///       // ...
+///       // ...
+///     ),
+///     body: Column(
+///       children: [
+///         // Dozens of widgets with complex conditionals
+///         // ...
+///         // ...
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: _buildAppBar(),
+///     body: _buildBody(),
+///   );
+/// }
+///
+/// Widget _buildAppBar() {
+///   return AppBar(title: Text('My Screen'));
+/// }
+///
+/// Widget _buildBody() {
+///   return Column(
+///     children: [
+///       _buildHeader(),
+///       _buildContent(),
+///       _buildFooter(),
+///     ],
+///   );
+/// }
+/// ```
 class AvoidLongAndComplexWidgetBuildMethodRule extends CustomRule {
   /// Creates a new instance of [AvoidLongAndComplexWidgetBuildMethodRule].
   AvoidLongAndComplexWidgetBuildMethodRule({

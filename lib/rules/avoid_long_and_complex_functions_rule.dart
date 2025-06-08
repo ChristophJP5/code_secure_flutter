@@ -7,6 +7,42 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// Lint Rule to avoid functions that are too long or complex
 /// This rule checks for function and method declarations that exceed a specified maximum character count or cyclomatic complexity.
 /// It helps maintain code readability and manageability by enforcing limits on function size and complexity.
+///
+/// **Configuration in `analysis_options.yaml`:**
+/// ```yaml
+/// custom_lint:
+///   rules:
+///     - avoid_long_and_complex_functions:
+///         error_severity: Warning
+///         function_max_char_count: 1100
+///         function_max_complexity: 15
+/// ```
+///
+/// **BAD:**
+/// ```dart
+/// void doEverythingAtOnce() {
+///   // 100+ lines of code with multiple responsibilities
+///   // Complex nested logic
+///   // Multiple different operations
+///   // ...
+///   // ...
+/// }
+/// ```
+///
+/// **GOOD:**
+/// ```dart
+/// void validateInput() {
+///   // 10-15 lines focused on input validation
+/// }
+///
+/// void processData() {
+///   // 30 - 50 lines focused on data processing
+/// }
+///
+/// void saveResults() {
+///   // 10-30 lines focused on saving results
+/// }
+/// ```
 class AvoidLongAndComplexFunctionsRule extends CustomRule {
   
   /// Constructor for the [AvoidLongAndComplexFunctionsRule].
