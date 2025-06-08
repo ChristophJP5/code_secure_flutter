@@ -46,7 +46,7 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 ///   final int age;
 ///
 ///   const UserWidget({required this.username, required this.age})
-///     : assert(username.isNotEmpty, 'Username cannot be empty'),
+///     : assert(username.length > 0, 'Username cannot be empty'),
 ///       assert(age > 0, 'Age must be positive');
 ///
 ///   @override
@@ -222,7 +222,7 @@ class _AddAssertTodoFix extends DartFix {
     if (parameterName.startsWith("List<") ||
         parameterName.startsWith("Map<") ||
         parameterName.startsWith("Set<")) {
-      return 'assert($parameterName.isNotEmpty, "$parameterName must not be empty, is: \$$parameterName");';
+      return 'assert($parameterName.length > 0, "$parameterName must not be empty, is: \$$parameterName");';
     }
     switch (parameterType) {
       case "DateTime":
@@ -246,7 +246,7 @@ const double ${parameterName}MaxValue = double.maxFinite;
 assert($parameterName < ${parameterName}MaxValue, "$parameterName must be less than \$${parameterName}MaxValue, is: \$$parameterName");
 """;
       case "String":
-        return 'assert($parameterName.isNotEmpty, "$parameterName must not be empty, is: \$$parameterName");';
+        return 'assert($parameterName.length > 0, "$parameterName must not be empty, is: \$$parameterName");';
       default:
         return 'assert($parameterName != null, "$parameterName must not be null, is: \$$parameterName");';
     }
@@ -259,7 +259,7 @@ assert($parameterName < ${parameterName}MaxValue, "$parameterName must be less t
     if (parameterName.startsWith("List<") ||
         parameterName.startsWith("Map<") ||
         parameterName.startsWith("Set<")) {
-      return 'assert($parameterName.isNotEmpty, "$parameterName must not be empty, is: \$$parameterName")';
+      return 'assert($parameterName.length > 0, "$parameterName must not be empty, is: \$$parameterName")';
     }
     switch (parameterType) {
       case "DateTime":
@@ -277,7 +277,7 @@ assert($parameterName > 0, "$parameterName must be greater than 0, is: \$$parame
 assert($parameterName < double.maxFinite, "$parameterName must be less than double.maxFinite, is: \$$parameterName")
 """;
       case "String":
-        return 'assert($parameterName.isNotEmpty, "$parameterName must not be empty, is: \$$parameterName")';
+        return 'assert($parameterName.length > 0, "$parameterName must not be empty, is: \$$parameterName")';
       default:
         return 'assert($parameterName != null, "$parameterName must not be null, is: \$$parameterName")';
     }

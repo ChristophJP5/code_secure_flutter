@@ -365,7 +365,7 @@ class UserWidget extends StatelessWidget {
   final int age;
   
   const UserWidget({required this.username, required this.age})
-    : assert(username.isNotEmpty, 'Username cannot be empty'),
+    : assert(username.length > 0, 'Username cannot be empty'),
       assert(age > 0, 'Age must be positive');
   
   @override
