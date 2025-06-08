@@ -144,7 +144,7 @@ class CheckReturnValueRule extends CustomRule {
       }
 
       final returnType = _getReturnType(invocation);
-      if (returnType == null || returnType == "void") {
+      if (returnType == null || returnType == "void" || returnType == "bool") {
         return;
       }
 

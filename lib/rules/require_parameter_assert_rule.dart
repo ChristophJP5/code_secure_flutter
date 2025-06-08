@@ -71,6 +71,8 @@ class RequireParameterAssertRule extends CustomRule {
   static final _excludeParameterType = <String>[
     "Key",
     "Key?",
+    "Widget",
+    "Widget?",
     "WidgetRef",
     "WidgetRef?",
     "BuildContext",
