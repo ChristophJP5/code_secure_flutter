@@ -2,6 +2,7 @@ import "package:analyzer/dart/ast/ast.dart";
 import "package:analyzer/dart/ast/token.dart";
 import "package:analyzer/dart/ast/visitor.dart";
 import "package:analyzer/dart/element/element.dart";
+import "package:analyzer/dart/element/type.dart";
 import "package:analyzer/error/error.dart" show AnalysisError, ErrorSeverity;
 import "package:analyzer/error/listener.dart";
 import "package:analyzer/source/source_range.dart";
@@ -129,6 +130,17 @@ class RequireParameterAssertRule extends CustomRule {
           continue;
         }
         final parameterType = parameter.declaredElement?.type.toString();
+
+        const widgetChecker = TypeChecker.any([
+          TypeChecker.fromName("Function"),
+          TypeChecker.fromName("VoidCallback"),
+        ]);
+
+        if (parameter.declaredFragment!.element.type.toString().contains(
+          "Function(",
+        )) {
+          continue;
+        }
         if (parameter.declaredElement?.type.isDartCoreFunction ?? false) {
           continue;
         }
