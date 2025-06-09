@@ -129,12 +129,17 @@ class RequireParameterAssertRule extends CustomRule {
         if (_excludeParameterName.contains(parameterName)) {
           continue;
         }
-        final parameterType = parameter.declaredElement?.type.toString();
+        final type = parameter.declaredElement?.type;
+        final parameterType = type.toString();
 
-        const widgetChecker = TypeChecker.any([
-          TypeChecker.fromName("Function"),
-          TypeChecker.fromName("VoidCallback"),
-        ]);
+        const widgetChecker = TypeChecker.any([TypeChecker.fromName("Widget")]);
+
+        if (type == null ||
+            widgetChecker.isAssignableFromType(type) ||
+            widgetChecker.isExactlyType(type) ||
+            widgetChecker.isSuperTypeOf(type)) {
+          continue;
+        }
 
         if (parameter.declaredFragment!.element.type.toString().contains(
           "Function(",
