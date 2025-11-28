@@ -1,4 +1,6 @@
 import "package:analyzer/dart/ast/ast.dart";
+import "package:analyzer/dart/ast/visitor.dart";
+import "package:analyzer/dart/element/element2.dart";
 import "package:analyzer/error/listener.dart";
 import "package:code_secure_flutter/rules/custom_rule.dart";
 import "package:custom_lint_builder/custom_lint_builder.dart";
@@ -35,7 +37,6 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// }
 /// ```
 class AvoidRecursionRule extends CustomRule {
-  
   /// Constructor for the [AvoidRecursionRule].
   AvoidRecursionRule({
     required super.configs,
@@ -53,43 +54,120 @@ class AvoidRecursionRule extends CustomRule {
     CustomLintContext context,
   ) {
     context.registry.addFunctionDeclaration((node) {
-      _addDeclarationListener(node, node.functionExpression.body, [
-        node.name.lexeme,
-      ], reporter);
+      _addDeclarationListener(
+        node,
+        node.functionExpression.body,
+        [
+          node.name.lexeme,
+        ],
+        reporter,
+      );
     });
 
     context.registry.addMethodDeclaration((node) {
       final parent = node.parent is ClassDeclaration
           ? node.parent! as ClassDeclaration
           : null;
-      _addDeclarationListener(node, node.body, [
-        node.name.lexeme,
-        if (parent?.name.lexeme != null) parent!.name.lexeme,
-      ], reporter);
+      _addDeclarationListener(
+        node,
+        node.body,
+        [
+          node.name.lexeme,
+          if (parent?.name.lexeme != null) parent!.name.lexeme,
+        ],
+        reporter,
+      );
     });
 
     context.registry.addConstructorDeclaration((node) {
-      _addDeclarationListener(node, node.body, [
-        node.returnType.name,
-      ], reporter);
+      _addDeclarationListener(
+        node,
+        node.body,
+        [
+          node.returnType.name,
+        ],
+        reporter,
+      );
     });
   }
 
   void _addDeclarationListener(
     AstNode node,
     FunctionBody? body,
-    List<String> names,
+    List<String> _,
     ErrorReporter reporter,
   ) {
-    final functionBody = body?.toSource();
-    if (functionBody == null) {
+    if (body == null) {
       return;
     }
-    for (final name in names) {
-      if (functionBody.contains("$name(") ||
-          functionBody.contains("$name.call")) {
-        reporter.atNode(node, code);
-      }
+
+    // Resolve the element of the current declaration.
+    final target = switch (node) {
+      FunctionDeclaration(:final declaredFragment) => declaredFragment?.element,
+      MethodDeclaration(:final declaredFragment) => declaredFragment?.element,
+      ConstructorDeclaration(:final declaredFragment) =>
+        declaredFragment?.element,
+      _ => null,
+    };
+
+    if (target == null) {
+      return;
     }
+
+    body.accept<void>(
+      _RecursionVisitor(
+        target: target,
+        onRecursiveCall: (recursiveNode) {
+          reporter.atNode(recursiveNode, code);
+        },
+      ),
+    );
+  }
+}
+
+class _RecursionVisitor extends RecursiveAstVisitor<void> {
+  _RecursionVisitor({
+    required this.target,
+    required this.onRecursiveCall,
+  });
+
+  final ExecutableElement2 target;
+  final void Function(AstNode node) onRecursiveCall;
+
+  bool _matches(Element2? element) =>
+      element is ExecutableElement2 && element == target;
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    if (_matches(node.methodName.element)) {
+      onRecursiveCall(node.methodName);
+    }
+    super.visitMethodInvocation(node);
+  }
+
+  @override
+  void visitFunctionExpressionInvocation(FunctionExpressionInvocation node) {
+    if (_matches(node.element)) {
+      onRecursiveCall(node.function);
+    }
+    super.visitFunctionExpressionInvocation(node);
+  }
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    if (_matches(node.constructorName.element)) {
+      onRecursiveCall(node.constructorName);
+    }
+    super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitRedirectingConstructorInvocation(
+    RedirectingConstructorInvocation node,
+  ) {
+    if (_matches(node.element)) {
+      onRecursiveCall(node);
+    }
+    super.visitRedirectingConstructorInvocation(node);
   }
 }

@@ -98,7 +98,7 @@ class AvoidLongAndComplexWidgetBuildMethodRule extends CustomRule {
         return;
       }
 
-      final classType = enclosingClass.declaredElement?.thisType;
+      final classType = enclosingClass.declaredFragment?.element.thisType;
       if (classType == null ||
           !_widgetCheckerForComplexity.isAssignableFromType(classType)) {
         return;

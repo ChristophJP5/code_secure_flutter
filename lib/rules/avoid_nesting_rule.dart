@@ -71,25 +71,40 @@ class AvoidNestingRule extends CustomRule {
     CustomLintContext context,
   ) {
     context.registry.addFunctionDeclaration((node) {
-      _addDeclarationListener(node, node.functionExpression.body, [
-        node.name.lexeme,
-      ], reporter);
+      _addDeclarationListener(
+        node,
+        node.functionExpression.body,
+        [
+          node.name.lexeme,
+        ],
+        reporter,
+      );
     });
 
     context.registry.addMethodDeclaration((node) {
       final parent = node.parent is ClassDeclaration
           ? node.parent! as ClassDeclaration
           : null;
-      _addDeclarationListener(node, node.body, [
-        node.name.lexeme,
-        if (parent?.name.lexeme != null) parent!.name.lexeme,
-      ], reporter);
+      _addDeclarationListener(
+        node,
+        node.body,
+        [
+          node.name.lexeme,
+          if (parent?.name.lexeme != null) parent!.name.lexeme,
+        ],
+        reporter,
+      );
     });
 
     context.registry.addConstructorDeclaration((node) {
-      _addDeclarationListener(node, node.body, [
-        node.returnType.name,
-      ], reporter);
+      _addDeclarationListener(
+        node,
+        node.body,
+        [
+          node.returnType.name,
+        ],
+        reporter,
+      );
     });
   }
 

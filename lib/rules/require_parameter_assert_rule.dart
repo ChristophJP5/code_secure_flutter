@@ -1,8 +1,7 @@
 import "package:analyzer/dart/ast/ast.dart";
 import "package:analyzer/dart/ast/token.dart";
 import "package:analyzer/dart/ast/visitor.dart";
-import "package:analyzer/dart/element/element.dart";
-import "package:analyzer/dart/element/type.dart";
+import "package:analyzer/dart/element/element2.dart";
 import "package:analyzer/error/error.dart" show AnalysisError, ErrorSeverity;
 import "package:analyzer/error/listener.dart";
 import "package:analyzer/source/source_range.dart";
@@ -129,7 +128,7 @@ class RequireParameterAssertRule extends CustomRule {
         if (_excludeParameterName.contains(parameterName)) {
           continue;
         }
-        final type = parameter.declaredElement?.type;
+        final type = parameter.declaredFragment?.element.type;
         final parameterType = type.toString();
 
         const widgetChecker = TypeChecker.any([TypeChecker.fromName("Widget")]);
@@ -142,17 +141,20 @@ class RequireParameterAssertRule extends CustomRule {
         }
 
         if (parameter.declaredFragment!.element.type.toString().contains(
-          "Function(",
-        )) {
+              "Function(",
+            )) {
           continue;
         }
-        if (parameter.declaredElement?.type.isDartCoreFunction ?? false) {
+        if (parameter.declaredFragment?.element.type.isDartCoreFunction ??
+            false) {
           continue;
         }
-        if (parameter.declaredElement?.type.isDartAsyncFuture ?? false) {
+        if (parameter.declaredFragment?.element.type.isDartAsyncFuture ??
+            false) {
           continue;
         }
-        if (parameter.declaredElement?.type.isDartAsyncFutureOr ?? false) {
+        if (parameter.declaredFragment?.element.type.isDartAsyncFutureOr ??
+            false) {
           continue;
         }
         if (_excludeParameterType.contains(parameterType)) {
@@ -165,8 +167,7 @@ class RequireParameterAssertRule extends CustomRule {
           continue;
         }
 
-        final isNamedWithDefault =
-            parameter.isNamed &&
+        final isNamedWithDefault = parameter.isNamed &&
             parameter is DefaultFormalParameter &&
             parameter.defaultValue != null;
         if (isNamedWithDefault) {
@@ -314,7 +315,7 @@ assert($parameterName < double.maxFinite, "$parameterName must be less than doub
       _addDeclarationListener(
         node.body,
         node.name ?? Token(TokenType.EOF, 0),
-        node.declaredElement,
+        node.declaredFragment?.element,
         node,
         reporter,
         analysisError,
@@ -324,7 +325,7 @@ assert($parameterName < double.maxFinite, "$parameterName must be less than doub
       _addDeclarationListener(
         node.body,
         node.name,
-        node.declaredElement,
+        node.declaredFragment?.element,
         node,
         reporter,
         analysisError,
@@ -334,7 +335,7 @@ assert($parameterName < double.maxFinite, "$parameterName must be less than doub
       _addDeclarationListener(
         node.functionExpression.body,
         node.name,
-        node.declaredElement,
+        node.declaredFragment?.element,
         node,
         reporter,
         analysisError,
@@ -345,7 +346,7 @@ assert($parameterName < double.maxFinite, "$parameterName must be less than doub
   void _addDeclarationListener(
     FunctionBody body,
     Token name,
-    ExecutableElement? declaredElement,
+    ExecutableElement2? declaredElement,
     AstNode node,
     ChangeReporter reporter,
     AnalysisError analysisError,
@@ -355,7 +356,7 @@ assert($parameterName < double.maxFinite, "$parameterName must be less than doub
       return;
     }
 
-    final sourceRange = SourceRange(method.nameOffset, name.length);
+    final sourceRange = SourceRange(method.name3?.length ?? 0, name.length);
     if (!analysisError.sourceRange.intersects(sourceRange)) {
       return;
     }
@@ -378,36 +379,36 @@ assert($parameterName < double.maxFinite, "$parameterName must be less than doub
 
     reporter
         .createChangeBuilder(
-          message: "Add assert for $parameterName",
-          priority: 1,
-        )
+      message: "Add assert for $parameterName",
+      priority: 1,
+    )
         .addDartFileEdit((builder) {
-          if (body is BlockFunctionBody) {
-            builder.addSimpleInsertion(
-              body.block.leftBracket.end,
-              "\n  ${generateAssertCheck(parameterName, parameterType)}",
-            );
-          } else if (body is ExpressionFunctionBody) {
-            // need to convert to a function with a block body to use assert
-            final expression = body.expression;
-            final bodyText =
-                " {\n  ${generateAssertCheck(parameterName, parameterType)}  return ${expression.toSource()};\n}";
-            builder.addSimpleReplacement(
-              SourceRange(body.offset, body.length),
-              bodyText,
-            );
-          } else {
-            var prefix = ":";
-            if (node is ConstructorDeclaration &&
-                node.initializers.any((e) => e is AssertInitializer)) {
-              prefix = ", \n";
-            }
+      if (body is BlockFunctionBody) {
+        builder.addSimpleInsertion(
+          body.block.leftBracket.end,
+          "\n  ${generateAssertCheck(parameterName, parameterType)}",
+        );
+      } else if (body is ExpressionFunctionBody) {
+        // need to convert to a function with a block body to use assert
+        final expression = body.expression;
+        final bodyText =
+            " {\n  ${generateAssertCheck(parameterName, parameterType)}  return ${expression.toSource()};\n}";
+        builder.addSimpleReplacement(
+          SourceRange(body.offset, body.length),
+          bodyText,
+        );
+      } else {
+        var prefix = ":";
+        if (node is ConstructorDeclaration &&
+            node.initializers.any((e) => e is AssertInitializer)) {
+          prefix = ", \n";
+        }
 
-            builder.addSimpleInsertion(
-              body.endToken.offset,
-              "$prefix${generateConstructorAssertCheck(parameterName, parameterType)}",
-            );
-          }
-        });
+        builder.addSimpleInsertion(
+          body.endToken.offset,
+          "$prefix${generateConstructorAssertCheck(parameterName, parameterType)}",
+        );
+      }
+    });
   }
 }

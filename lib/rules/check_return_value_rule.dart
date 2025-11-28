@@ -1,6 +1,6 @@
 import "package:analyzer/dart/ast/ast.dart";
 import "package:analyzer/dart/ast/token.dart";
-import "package:analyzer/dart/element/element.dart";
+import "package:analyzer/dart/element/element2.dart";
 import "package:analyzer/error/error.dart" hide LintCode;
 import "package:analyzer/error/listener.dart";
 import "package:analyzer/source/source_range.dart";
@@ -97,8 +97,8 @@ class CheckReturnValueRule extends CustomRule {
     final ifDeclaration = root.childEntities
         .whereType<IfStatement>()
         .firstWhereOrNull((ifStatement) {
-          return ifStatement.expression.toSource().contains("$methodName(");
-        });
+      return ifStatement.expression.toSource().contains("$methodName(");
+    });
     if (ifDeclaration != null) {
       reporter.atNode(
         invocation,
@@ -112,8 +112,8 @@ class CheckReturnValueRule extends CustomRule {
     final forDeclaration = root.childEntities
         .whereType<ForStatement>()
         .firstWhereOrNull((statement) {
-          return statement.toSource().contains("$methodName(");
-        });
+      return statement.toSource().contains("$methodName(");
+    });
     if (forDeclaration != null) {
       reporter.atNode(
         invocation,
@@ -157,17 +157,16 @@ class CheckReturnValueRule extends CustomRule {
       }
 
       final methodName = invocation.methodName.name;
-      final root =
-          body.childEntities.firstWhereOrNull((entity) => entity is Block)
-              as Block?;
+      final root = body.childEntities
+          .firstWhereOrNull((entity) => entity is Block) as Block?;
       if (root == null) {
         return;
       }
       final variableDeclaration = root.childEntities
           .whereType<VariableDeclarationStatement>()
           .firstWhereOrNull((variable) {
-            return variable.toSource().contains("$methodName(");
-          });
+        return variable.toSource().contains("$methodName(");
+      });
       if (variableDeclaration == null) {
         _addListenerWithoutVariableDeclaration(
           root,
@@ -199,18 +198,18 @@ class CheckReturnValueRule extends CustomRule {
       final isChecked = root.childEntities.any((entity) {
         if (entity is IfStatement) {
           return entity.expression.unParenthesized.toString().contains(
-            variableName,
-          );
+                variableName,
+              );
         }
         if (entity is AssertStatement) {
           return entity.condition.unParenthesized.toString().contains(
-            variableName,
-          );
+                variableName,
+              );
         }
         if (entity is AssertInitializer) {
           return entity.condition.unParenthesized.toString().contains(
-            variableName,
-          );
+                variableName,
+              );
         }
         return false;
       });
@@ -331,7 +330,6 @@ if($parameterName == null){
   void run(
     CustomLintResolver resolver,
     ChangeReporter reporter,
-
     CustomLintContext context,
     AnalysisError analysisError,
     List<AnalysisError> others,
@@ -340,7 +338,7 @@ if($parameterName == null){
       _addDeclarationListener(
         node.functionExpression.body,
         node.name,
-        node.declaredElement,
+        node.declaredFragment?.element,
         reporter,
         analysisError,
       );
@@ -349,7 +347,7 @@ if($parameterName == null){
       _addDeclarationListener(
         node.body,
         node.name,
-        node.declaredElement,
+        node.declaredFragment?.element,
         reporter,
         analysisError,
       );
@@ -358,7 +356,7 @@ if($parameterName == null){
       _addDeclarationListener(
         node.functionExpression.body,
         node.name,
-        node.declaredElement,
+        node.declaredFragment?.element,
         reporter,
         analysisError,
       );
@@ -368,7 +366,7 @@ if($parameterName == null){
   void _addDeclarationListener(
     FunctionBody body,
     Token name,
-    ExecutableElement? declaredElement,
+    ExecutableElement2? declaredElement,
     ChangeReporter reporter,
     AnalysisError analysisError,
   ) {
@@ -377,7 +375,7 @@ if($parameterName == null){
       return;
     }
 
-    final sourceRange = SourceRange(method.nameOffset, name.length);
+    final sourceRange = SourceRange(method.name3?.length ?? 0, name.length);
     if (!analysisError.sourceRange.intersects(sourceRange)) {
       return;
     }
@@ -400,25 +398,25 @@ if($parameterName == null){
 
     reporter
         .createChangeBuilder(
-          message: "Add check for $parameterName",
-          priority: 1,
-        )
+      message: "Add check for $parameterName",
+      priority: 1,
+    )
         .addDartFileEdit((builder) {
-          if (body is BlockFunctionBody) {
-            builder.addSimpleInsertion(
-              body.block.leftBracket.end,
-              "\n  ${generateCheck(parameterName, parameterType)}\n",
-            );
-          } else if (body is ExpressionFunctionBody) {
-            // need to convert to a function with a block body to use assert
-            final expression = body.expression;
-            final bodyText =
-                " {\n  ${generateCheck(parameterName, parameterType)}\n  return ${expression.toSource()};\n}";
-            builder.addSimpleReplacement(
-              SourceRange(body.offset, body.length),
-              bodyText,
-            );
-          }
-        });
+      if (body is BlockFunctionBody) {
+        builder.addSimpleInsertion(
+          body.block.leftBracket.end,
+          "\n  ${generateCheck(parameterName, parameterType)}\n",
+        );
+      } else if (body is ExpressionFunctionBody) {
+        // need to convert to a function with a block body to use assert
+        final expression = body.expression;
+        final bodyText =
+            " {\n  ${generateCheck(parameterName, parameterType)}\n  return ${expression.toSource()};\n}";
+        builder.addSimpleReplacement(
+          SourceRange(body.offset, body.length),
+          bodyText,
+        );
+      }
+    });
   }
 }

@@ -1,7 +1,7 @@
 import "package:analyzer/dart/ast/ast.dart";
 import "package:analyzer/dart/ast/token.dart";
 import "package:analyzer/dart/ast/visitor.dart";
-import "package:analyzer/dart/element/element.dart";
+import "package:analyzer/dart/element/element2.dart";
 import "package:analyzer/error/error.dart" hide LintCode;
 import "package:analyzer/error/listener.dart";
 import "package:analyzer/source/source_range.dart";
@@ -44,7 +44,7 @@ const _stateChecker = TypeChecker.fromName("State", packageName: "flutter");
 ///   void initState() {
 ///     super.initState();
 ///     fetchData().then((_) {
-///       if (!mounted) { 
+///       if (!mounted) {
 ///         return;
 ///       }
 ///       setState(() {
@@ -77,7 +77,7 @@ class RequireMountedCheckInAsyncCallbacksRule extends CustomRule {
         return;
       }
 
-      final classType = enclosingClass.declaredElement?.thisType;
+      final classType = enclosingClass.declaredFragment?.element.thisType;
       if (classType == null || !_stateChecker.isAssignableFromType(classType)) {
         return;
       }
@@ -211,7 +211,6 @@ class _AddMountedCheckFix extends DartFix {
   void run(
     CustomLintResolver resolver,
     ChangeReporter reporter,
-
     CustomLintContext context,
     AnalysisError analysisError,
     List<AnalysisError> others,
@@ -220,7 +219,7 @@ class _AddMountedCheckFix extends DartFix {
       _addDeclarationListener(
         node.functionExpression.body,
         node.name,
-        node.declaredElement,
+        node.declaredFragment?.element,
         reporter,
         analysisError,
       );
@@ -229,7 +228,7 @@ class _AddMountedCheckFix extends DartFix {
       _addDeclarationListener(
         node.body,
         node.name,
-        node.declaredElement,
+        node.declaredFragment?.element,
         reporter,
         analysisError,
       );
@@ -238,7 +237,7 @@ class _AddMountedCheckFix extends DartFix {
       _addDeclarationListener(
         node.functionExpression.body,
         node.name,
-        node.declaredElement,
+        node.declaredFragment?.element,
         reporter,
         analysisError,
       );
@@ -248,7 +247,7 @@ class _AddMountedCheckFix extends DartFix {
   void _addDeclarationListener(
     FunctionBody body,
     Token name,
-    ExecutableElement? declaredElement,
+    ExecutableElement2? declaredElement,
     ChangeReporter reporter,
     AnalysisError analysisError,
   ) {
@@ -257,7 +256,7 @@ class _AddMountedCheckFix extends DartFix {
       return;
     }
 
-    final sourceRange = SourceRange(method.nameOffset, name.length);
+    final sourceRange = SourceRange(method.name3?.length??0, name.length);
     if (!analysisError.sourceRange.intersects(sourceRange)) {
       return;
     }
@@ -280,27 +279,27 @@ class _AddMountedCheckFix extends DartFix {
 
     reporter
         .createChangeBuilder(
-          message: "Add assert for $parameterName",
-          priority: 1,
-        )
+      message: "Add assert for $parameterName",
+      priority: 1,
+    )
         .addDartFileEdit((builder) {
-          if (body is BlockFunctionBody) {
-            builder
-              ..addSimpleInsertion(
-                body.block.leftBracket.end,
-                "\n if(mounted) { \n",
-              )
-              ..addSimpleInsertion(body.block.rightBracket.end, "\n } \n");
-          } else if (body is ExpressionFunctionBody) {
-            // need to convert to a function with a block body to use assert
-            final expression = body.expression;
-            final bodyText =
-                " \n  if(mounted) { \n return ${expression.toSource()};\n}";
-            builder.addSimpleReplacement(
-              SourceRange(body.offset, body.length),
-              bodyText,
-            );
-          }
-        });
+      if (body is BlockFunctionBody) {
+        builder
+          ..addSimpleInsertion(
+            body.block.leftBracket.end,
+            "\n if(mounted) { \n",
+          )
+          ..addSimpleInsertion(body.block.rightBracket.end, "\n } \n");
+      } else if (body is ExpressionFunctionBody) {
+        // need to convert to a function with a block body to use assert
+        final expression = body.expression;
+        final bodyText =
+            " \n  if(mounted) { \n return ${expression.toSource()};\n}";
+        builder.addSimpleReplacement(
+          SourceRange(body.offset, body.length),
+          bodyText,
+        );
+      }
+    });
   }
 }
