@@ -8,8 +8,6 @@ import "package:analyzer/source/source_range.dart";
 import "package:code_secure_flutter/rules/custom_rule.dart";
 import "package:custom_lint_builder/custom_lint_builder.dart";
 
-const _stateChecker = TypeChecker.fromName("State", packageName: "flutter");
-
 /// A lint that requires a `mounted` check for operations after an `await`.
 /// This rule checks for asynchronous methods in classes that extend `State`
 /// and ensures that any calls to `setState`, `context`, or similar operations
@@ -18,7 +16,7 @@ const _stateChecker = TypeChecker.fromName("State", packageName: "flutter");
 /// ```yaml
 /// custom_lint:
 ///   rules:
-///     - require_mounted_check_in_async_callbacks:
+///     - avoid_unsafe_context_call_in_async_callbacks:
 ///         error_severity: Error
 /// ```
 ///
@@ -54,16 +52,21 @@ const _stateChecker = TypeChecker.fromName("State", packageName: "flutter");
 ///   }
 /// }
 /// ```
-class RequireMountedCheckInAsyncCallbacksRule extends CustomRule {
-  /// Creates a new instance of [RequireMountedCheckInAsyncCallbacksRule].
-  RequireMountedCheckInAsyncCallbacksRule({
+class AvoidUnsafeContextCallInAsyncCallbacksRule extends CustomRule {
+  /// Creates a new instance of [AvoidUnsafeContextCallInAsyncCallbacksRule].
+  AvoidUnsafeContextCallInAsyncCallbacksRule({
     required super.configs,
-    super.ruleName = "require_mounted_check_in_async_callbacks",
+    super.ruleName = "avoid_unsafe_context_call_in_async_callbacks",
     super.ruleProblemMessage =
         'The widget may be disposed of after an async gap. This call is not guarded by a "mounted" check.',
     super.correctionMessage =
         "Wrap this call in `if (mounted) { ... }` to prevent runtime errors.",
   });
+
+  static const _stateChecker = TypeChecker.fromName(
+    "State",
+    packageName: "flutter",
+  );
 
   @override
   void run(
@@ -256,7 +259,7 @@ class _AddMountedCheckFix extends DartFix {
       return;
     }
 
-    final sourceRange = SourceRange(method.name3?.length??0, name.length);
+    final sourceRange = SourceRange(method.name3?.length ?? 0, name.length);
     if (!analysisError.sourceRange.intersects(sourceRange)) {
       return;
     }
@@ -287,14 +290,14 @@ class _AddMountedCheckFix extends DartFix {
         builder
           ..addSimpleInsertion(
             body.block.leftBracket.end,
-            "\n if(mounted) { \n",
+            "\n if(!mounted) { \n return; \n } \n",
           )
-          ..addSimpleInsertion(body.block.rightBracket.end, "\n } \n");
+          ..addSimpleInsertion(body.block.rightBracket.end, "\n");
       } else if (body is ExpressionFunctionBody) {
         // need to convert to a function with a block body to use assert
         final expression = body.expression;
         final bodyText =
-            " \n  if(mounted) { \n return ${expression.toSource()};\n}";
+            " \n  if(!mounted) { \n return; \n } \n return ${expression.toSource()};\n";
         builder.addSimpleReplacement(
           SourceRange(body.offset, body.length),
           bodyText,

@@ -16,7 +16,7 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// ```yaml
 /// custom_lint:
 ///   rules:
-///     - check_return_value:
+///     - require_return_value_check:
 ///         error_severity: Error
 /// ```
 ///
@@ -38,15 +38,15 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 ///   doSomethingElse();
 /// }
 /// ```
-class CheckReturnValueRule extends CustomRule {
-  /// Constructor for the [CheckReturnValueRule].
-  CheckReturnValueRule({
+class RequireReturnValueCheckRule extends CustomRule {
+  /// Constructor for the [RequireReturnValueCheckRule].
+  RequireReturnValueCheckRule({
     required super.configs,
-    super.ruleName = "check_return_value",
+    super.ruleName = "require_return_value_check",
     super.ruleProblemMessage =
         "Check the return value of all non-void functions",
     super.correctionMessage =
-        "CAdd a check for the return value of the function, cast it to void if the return value is not needed or add a comment explaining why it is not needed.",
+        "Add a check for the return value of the function, cast it to void if the return value is not needed or add a comment explaining why it is not needed.",
     super.errorSeverity = ErrorSeverity.ERROR,
   });
 

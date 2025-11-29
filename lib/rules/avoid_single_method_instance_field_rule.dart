@@ -12,7 +12,7 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// ```yaml
 /// custom_lint:
 ///   rules:
-///     - prefer_local_variable_for_single_method_instance_field:
+///     - avoid_single_method_instance_field:
 ///         error_severity: Warning
 /// ```
 ///
@@ -40,11 +40,11 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 ///   }
 /// }
 /// ```
-class PreferLocalVariableForSingleMethodInstanceFieldRule extends CustomRule {
-  /// Constructor for the [PreferLocalVariableForSingleMethodInstanceFieldRule].
-  PreferLocalVariableForSingleMethodInstanceFieldRule({
+class AvoidSingleMethodInstanceFieldRule extends CustomRule {
+  /// Constructor for the [AvoidSingleMethodInstanceFieldRule].
+  AvoidSingleMethodInstanceFieldRule({
     required super.configs,
-    super.ruleName = "prefer_local_variable_for_single_method_instance_field",
+    super.ruleName = "avoid_single_method_instance_field",
     super.ruleProblemMessage =
         "Instance field 'appears to be used only within the method",
   });

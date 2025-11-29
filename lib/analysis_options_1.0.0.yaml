@@ -303,7 +303,70 @@ custom_lint:
       function_max_char_count: 1100
     - avoid_nesting:
       nesting_max_depth: 2
-    - require_parameter_assert:
+    - require_parameter_check:
       exclude_parameter_types: 
         - WidgetRef
         - WidgetRef?
+    - avoid_boolean_parameters:
+      min_comment_length: 12
+    - avoid_commented_out_code:
+      min_consecutive_lines: 3
+      min_detection_score: 2
+    - avoid_long_and_complex_widget_build_method:
+      max-lines: 80
+      max-nesting-depth: 6
+    - avoid_nested_method_invocations:
+      max_chain_depth: 4
+    - require_stream_subscription_disposal:
+      require_dispose_override: true
+    - avoid_too_many_parameters:
+      max_parameter_count: 5
+      ignore_override_methods: true
+    - require_secure_credential_storage:
+      min_literal_length: 8
+    - require_secure_storage_for_sensitive_data:
+      sensitive_keys:
+        - password
+        - secret
+        - token
+        - apikey
+        - refresh
+        - session
+    - require_secure_random_number_generator:
+      ignored_identifiers: []
+    - require_verified_ssl_certificates: {}
+    - avoid_magic_numbers:
+      allowed_numbers:
+        - "-1"
+        - "0"
+        - "0.5"
+        - "1"
+        - "2"
+        - "10"
+      ignore_const_contexts: true
+      ignore_enum_values: true
+      ignore_switch_cases: true
+    - avoid_magic_strings:
+      allowed_strings:
+        - ""
+        - " "
+        - "."
+        - ","
+        - ":"
+        - ";"
+        - "-"
+        - "_"
+      min_length: 3
+      ignore_const_contexts: true
+      ignore_enum_values: true
+      ignore_annotation_arguments: true
+      ignore_map_keys: true
+      ignore_switch_cases: true
+      ignore_import_export_directives: true
+    - avoid_public_mutable_state:
+      ignored_fields: []
+      ignored_types: []
+      ignored_classes: []
+    - avoid_large_classes:
+      max_members: 20
+      max_lines: 400

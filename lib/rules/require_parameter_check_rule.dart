@@ -19,7 +19,7 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// ```yaml
 /// custom_lint:
 ///   rules:
-///     - require_parameter_assert:
+///     - require_parameter_check:
 ///         error_severity: Error
 /// ```
 ///
@@ -55,11 +55,11 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 ///   }
 /// }
 /// ```
-class RequireParameterAssertRule extends CustomRule {
-  /// Constructor for the [RequireParameterAssertRule].
-  RequireParameterAssertRule({
+class RequireParameterCheckRule extends CustomRule {
+  /// Constructor for the [RequireParameterCheckRule].
+  RequireParameterCheckRule({
     required super.configs,
-    super.ruleName = "require_parameter_assert",
+    super.ruleName = "require_parameter_check",
     super.ruleProblemMessage =
         "Parameter should have a 'assert' statement for validation check.",
     super.correctionMessage =

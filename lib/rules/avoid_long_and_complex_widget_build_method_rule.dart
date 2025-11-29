@@ -86,7 +86,7 @@ class AvoidLongAndComplexWidgetBuildMethodRule extends CustomRule {
     CustomLintContext context,
   ) {
     final maxLines = configs.getInt(code.name, "max-lines") ?? 80;
-    final maxNestingDepth = configs.getInt(code.name, "max-nesting-depth") ?? 7;
+    final maxNestingDepth = configs.getInt(code.name, "max-nesting-depth") ?? 5;
 
     context.registry.addMethodDeclaration((node) {
       if (node.name.lexeme != "build") {

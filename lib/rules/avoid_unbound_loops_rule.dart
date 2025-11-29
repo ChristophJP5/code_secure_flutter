@@ -12,7 +12,7 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// ```yaml
 /// custom_lint:
 ///   rules:
-///     - loops_require_fixed_bound:
+///     - avoid_unbound_loops:
 ///         error_severity: Error
 /// ```
 ///
@@ -31,19 +31,18 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// void boundedLoop() {
 ///   final maxIterations = 100;
 ///   int i = 0;
-///   
+///
 ///   while (i < maxIterations && !isDone()) {
 ///     doSomething();
 ///     i++;
 ///   }
 /// }
 /// ```
-class LoopsRequireFixedBoundRule extends CustomRule {
-  
-  /// Constructor for the [LoopsRequireFixedBoundRule].
-  LoopsRequireFixedBoundRule({
+class AvoidUnboundLoopsRule extends CustomRule {
+  /// Constructor for the [AvoidUnboundLoopsRule].
+  AvoidUnboundLoopsRule({
     required super.configs,
-    super.ruleName = "loops_require_fixed_bound",
+    super.ruleName = "avoid_unbound_loops",
     super.ruleProblemMessage =
         "Loops should have a fixed bound to avoid infinite loops",
     super.correctionMessage = "Consider using a loop with a defined limit.",

@@ -12,7 +12,7 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 /// ```yaml
 /// custom_lint:
 ///   rules:
-///     - pure_build_methods:
+///     - avoid_impure_build_methods:
 ///         error_severity: Error
 /// ```
 ///
@@ -42,11 +42,11 @@ import "package:custom_lint_builder/custom_lint_builder.dart";
 ///   }
 /// }
 /// ```
-class PureBuildMethodsRule extends CustomRule {
-  /// Creates a new instance of [PureBuildMethodsRule].
-  PureBuildMethodsRule({
+class AvoidImpureBuildMethodsRule extends CustomRule {
+  /// Creates a new instance of [AvoidImpureBuildMethodsRule].
+  AvoidImpureBuildMethodsRule({
     required super.configs,
-    super.ruleName = "pure_build_methods",
+    super.ruleName = "avoid_impure_build_methods",
     super.ruleProblemMessage = "Side effects are forbidden in build methods.",
     super.correctionMessage =
         "Move this async call to initState, didChangeDependencies, or a state management listener.",

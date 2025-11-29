@@ -88,12 +88,25 @@ My package comes with the following rules:
 | [avoid_long_and_complex_widget_build_method](lib/rules/avoid_long_and_complex_widget_build_method_rule.dart) | Keeps your widget's build methods simple. Remember, "build" is not French for "write a novel." | WARNING |
 | [avoid_nesting](lib/rules/avoid_nesting_rule.dart) | Prevents excessive nesting. If your code looks like Russian dolls, you f*cked up. | WARNING |
 | [avoid_recursion](lib/rules/avoid_recursion_rule.dart) | Flags recursive methods. | WARNING |
-| [check_return_value](lib/rules/check_return_value_rule.dart) | Makes sure you don't ignore return values. They have feelings too. | ERROR |
-| [loops_require_fixed_bound](lib/rules/loops_require_fixed_bound_rule.dart) | Ensures loops have a fixed bound to prevent infinite loops. | ERROR |
-| [require_parameter_assert](lib/rules/require_parameter_assert_rule.dart) | Enforces parameter validation through assertions. Trust no one, not even your own parameters. | ERROR |
-| [prefer_local_variable_for_single_method_instance_field](lib/rules/prefer_local_variable_for_single_method_instance_field_rule.dart) | Suggests using local variables when fields are only used in one method. Some things should be together, like me and my wife. | WARNING |
-| [pure_build_methods](lib/rules/pure_build_methods_rule.dart) | Ensures build methods don't have side effects. If you still have Side effects, contact your doctor for counseling | ERROR |
-| [require_mounted_check_in_async_callbacks](lib/rules/require_mounted_check_in_async_callbacks_rule.dart) | Requires mounted checks in async callbacks to prevent setState after dispose. Cause calling setState after dispose, is like calling your ex - technically possible but never a good idea. | ERROR |
+| [require_return_value_check](lib/rules/require_return_value_check_rule.dart) | Makes sure you don't ignore return values. They have feelings too. | ERROR |
+| [avoid_unbound_loops](lib/rules/avoid_unbound_loops_rule.dart) | Ensures loops have a fixed bound to prevent infinite loops. | ERROR |
+| [require_parameter_check](lib/rules/require_parameter_check_rule.dart) | Enforces parameter validation through assertions. Trust no one, not even your own parameters. | ERROR |
+| [avoid_boolean_parameters](lib/rules/avoid_boolean_parameters_rule.dart) | Forces you to explain boolean parameters so future-you remembers what `true` meant. | WARNING |
+| [avoid_commented_out_code](lib/rules/avoid_commented_out_code_rule.dart) | Shames giant commented blobs so you delete them instead of hoarding legacy junk. | WARNING |
+| [avoid_magic_numbers](lib/rules/avoid_magic_numbers_rule.dart) | Forces you to give scary numbers a friendly, well-named constant. | WARNING |
+| [avoid_magic_strings](lib/rules/avoid_magic_strings_rule.dart) | Nudges you to name repeated strings instead of sprinkling literals everywhere. | WARNING |
+| [avoid_nested_method_invocations](lib/rules/avoid_nested_method_invocations_rule.dart) | Stops excessively long method chains so you can actually step through them in a debugger. | WARNING |
+| [require_stream_subscription_disposal](lib/rules/require_stream_subscription_disposal_rule.dart) | Forces every StreamSubscription to get a proper `cancel()` in `dispose()`. No more zombie listeners. | ERROR |
+| [avoid_too_many_parameters](lib/rules/avoid_too_many_parameters_rule.dart) | Shames APIs with endless parameters so you reach for data classes or builders instead. | WARNING |
+| [require_secure_credential_storage](lib/rules/require_secure_credential_storage_rule.dart) | Catches inline secrets before they end up immortalized in git history. | ERROR |
+| [require_secure_storage_for_sensitive_data](lib/rules/require_secure_storage_for_sensitive_data_rule.dart) | Yells when you try to stash tokens in SharedPreferences instead of the platform keystore. | ERROR |
+| [require_secure_random_number_generator](lib/rules/require_secure_random_number_generator_rule.dart) | Warns when `Random()` is used for anything more serious than shuffling a deck. | ERROR |
+| [avoid_public_mutable_state](lib/rules/avoid_public_mutable_state_rule.dart) | Reminds you that public mutable fields are just global variables in disguise. | WARNING |
+| [avoid_large_classes](lib/rules/avoid_large_classes_rule.dart) | Points out god classes before they become religions. | WARNING |
+| [require_verified_ssl_certificates](lib/rules/require_verified_ssl_certificates_rule.dart) | Prevents code from blindly trusting every TLS certificate on the internet. | ERROR |
+| [avoid_single_method_instance_field](lib/rules/avoid_single_method_instance_field_rule.dart) | Suggests using local variables when fields are only used in one method. Some things should be together, like me and my wife. | WARNING |
+| [avoid_impure_build_methods](lib/rules/avoid_impure_build_methods_rule.dart) | Ensures build methods don't have side effects. If you still have Side effects, contact your doctor for counseling | ERROR |
+| [avoid_unsafe_context_call_in_async_callbacks](lib/rules/avoid_unsafe_context_call_in_async_callbacks_rule.dart) | Requires mounted checks in async callbacks to prevent setState after dispose. Cause calling setState after dispose, is like calling your ex - technically possible but never a good idea. | ERROR |
 
 
 ### Configuration And Examples for Rules
@@ -270,13 +283,13 @@ int factorial(int n) {
 }
 ```
 
-#### check_return_value
+#### require_return_value_check
 
 **Configuration in `analysis_options.yaml`:**
 ```yaml
 custom_lint:
   rules:
-    - check_return_value:
+    - require_return_value_check:
         error_severity: Error
 ```
 
@@ -299,13 +312,13 @@ Future<void> processFile() async {
 }
 ```
 
-#### loops_require_fixed_bound
+#### avoid_unbound_loops
 
 **Configuration in `analysis_options.yaml`:**
 ```yaml
 custom_lint:
   rules:
-    - loops_require_fixed_bound:
+    - avoid_unbound_loops:
         error_severity: Error
 ```
 
@@ -332,13 +345,13 @@ void boundedLoop() {
 }
 ```
 
-#### require_parameter_assert
+#### require_parameter_check
 
 **Configuration in `analysis_options.yaml`:**
 ```yaml
 custom_lint:
   rules:
-    - require_parameter_assert:
+    - require_parameter_check:
         error_severity: Error
 ```
 
@@ -375,13 +388,413 @@ class UserWidget extends StatelessWidget {
 }
 ```
 
-#### prefer_local_variable_for_single_method_instance_field
+#### avoid_boolean_parameters
 
 **Configuration in `analysis_options.yaml`:**
 ```yaml
 custom_lint:
   rules:
-    - prefer_local_variable_for_single_method_instance_field:
+    - avoid_boolean_parameters:
+        min_comment_length: 12
+```
+
+**BAD:**
+```dart
+Future<void> updateUser(bool force) async {
+  // Nobody remembers what `force` does.
+}
+```
+
+**GOOD:**
+```dart
+Future<void> updateUser(
+  bool force, // Forces remote refresh even if cache looks valid.
+) async {
+  // Clear explanation = happy reviewers.
+}
+```
+
+#### avoid_commented_out_code
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - avoid_commented_out_code:
+        min_consecutive_lines: 3
+        min_detection_score: 2
+```
+
+**BAD:**
+```dart
+// Future<void> legacyFlow() async {
+//   await api.fetch();
+//   if (!mounted) return;
+//   setState(() {});
+// }
+```
+
+**GOOD:**
+```dart
+// Document the follow-up instead of freezing code in amber.
+// TODO(BUG-123): Reintroduce new flow once backend is fixed.
+```
+
+#### avoid_nested_method_invocations
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - avoid_nested_method_invocations:
+        max_chain_depth: 4
+```
+
+**BAD:**
+```dart
+final response = client
+    .tenant(id)
+    .account(userId)
+    .withHeaders(headers)
+    .withRetryPolicy(policy)
+    .load()
+    .map(transform)
+    .where(filter)
+    .single;
+```
+
+**GOOD:**
+```dart
+final tenant = client.tenant(id);
+final account = tenant.account(userId);
+final prepared = account.withHeaders(headers).withRetryPolicy(policy);
+final response = await prepared.load();
+final result = response.map(transform).where(filter).single;
+```
+
+#### require_stream_subscription_disposal
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - require_stream_subscription_disposal:
+        require_dispose_override: true
+```
+
+**BAD:**
+```dart
+class FeedState extends State<FeedScreen> {
+  late final StreamSubscription<Post> _postUpdates;
+
+  @override
+  void initState() {
+    super.initState();
+    _postUpdates = widget.stream.listen(_handlePost);
+  }
+  // Oops, no dispose/cancel.
+}
+```
+
+#### avoid_too_many_parameters
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - avoid_too_many_parameters:
+        max_parameter_count: 5
+        ignore_override_methods: true
+```
+
+**BAD:**
+```dart
+Widget buildButton(
+  String label,
+  VoidCallback onTap,
+  Color background,
+  Color foreground,
+  double width,
+  double height,
+  bool isLoading,
+  IconData? icon,
+) {
+  // ...
+}
+```
+
+#### require_secure_credential_storage
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - require_secure_credential_storage:
+        min_literal_length: 8
+        suspicious_keywords:
+          - password
+          - token
+```
+
+**BAD:**
+```dart
+const apiKey = "sk_live_51LsSomeMegaSecret";
+final headers = {
+  "Authorization": "Bearer ya29.a0AR...",
+  "password": "hunter2",
+};
+```
+
+**GOOD:**
+```dart
+final apiKey = dotenv.env["PAYMENTS_SECRET"]!;
+final headers = {
+  "Authorization": "Bearer ${tokenProvider()}"
+};
+```
+
+#### require_secure_storage_for_sensitive_data
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - require_secure_storage_for_sensitive_data:
+        sensitive_keys:
+          - password
+          - token
+```
+
+**BAD:**
+```dart
+await prefs.setString("refreshToken", token);
+await prefs.setString("password", controller.text);
+```
+
+**GOOD:**
+```dart
+final secureStorage = const FlutterSecureStorage();
+await secureStorage.write(key: "refreshToken", value: token);
+```
+
+#### require_secure_random_number_generator
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - require_secure_random_number_generator:
+        ignored_identifiers: []
+```
+
+**BAD:**
+```dart
+final otp = Random().nextInt(999999);
+final salt = Random().nextBytes(16);
+```
+
+**GOOD:**
+```dart
+final otp = Random.secure().nextInt(999999);
+final salt = _secureRandomBytes(16); // from crypto package or platform API
+```
+
+#### require_verified_ssl_certificates
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - require_verified_ssl_certificates: {}
+```
+
+**BAD:**
+```dart
+client.badCertificateCallback = (cert, host, port) => true;
+```
+
+**GOOD:**
+```dart
+client.badCertificateCallback = (cert, host, port) {
+  final isTrusted = allowedFingerprints.contains(cert.sha256);
+  return isTrusted;
+};
+```
+
+
+#### avoid_magic_numbers
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - avoid_magic_numbers:
+        allowed_numbers:
+          - "-1"
+          - "0"
+          - "0.5"
+          - "1"
+          - "2"
+          - "10"
+        ignore_const_contexts: true
+```
+
+**BAD:**
+```dart
+final throttle = 37;
+if (millisecondsSinceLastTap < 250) {
+  return;
+}
+```
+
+**GOOD:**
+```dart
+const _throttleMs = 37;
+const _cooldownMs = 250;
+
+if (millisecondsSinceLastTap < _cooldownMs) {
+  return;
+}
+await Future<void>.delayed(Duration(milliseconds: _throttleMs));
+```
+
+#### avoid_magic_strings
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - avoid_magic_strings:
+        allowed_strings:
+          - ""
+          - " "
+          - "."
+        min_length: 3
+        ignore_annotation_arguments: true
+```
+
+**BAD:**
+```dart
+if (status == "approved") {
+  showToast("approved");
+}
+```
+
+**GOOD:**
+```dart
+const statusApproved = "approved";
+
+if (status == statusApproved) {
+  showToast(statusApproved);
+}
+```
+
+#### avoid_public_mutable_state
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - avoid_public_mutable_state:
+        ignored_fields: []
+        ignored_types:
+          - valuenotifier
+        ignored_classes: []
+```
+
+**BAD:**
+```dart
+class SessionController {
+  String userId = ""; // Anybody can reassign this.
+}
+```
+
+**GOOD:**
+```dart
+class SessionController {
+  SessionController(this._userId);
+  final String _userId;
+
+  String get userId => _userId;
+}
+```
+
+#### avoid_large_classes
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - avoid_large_classes:
+        max_members: 20
+        max_lines: 200
+```
+
+**BAD:**
+```dart
+class OrderService {
+  // 400 lines of networking, validation, UI glue, everything.
+}
+```
+
+**GOOD:**
+```dart
+class OrderRepository { /* networking */ }
+class OrderValidator { /* validation */ }
+class OrderPresenter { /* presentation */ }
+```
+**GOOD:**
+```dart
+class ButtonStyle {
+  const ButtonStyle({
+    required this.background,
+    required this.foreground,
+    required this.dimensions,
+    this.icon,
+  });
+
+  final Color background;
+  final Color foreground;
+  final Size dimensions;
+  final IconData? icon;
+}
+
+Widget buildButton({
+  required String label,
+  required VoidCallback onTap,
+  required ButtonStyle style,
+  bool isLoading = false,
+}) {
+  // Cleaner signature.
+}
+```
+
+**GOOD:**
+```dart
+class FeedState extends State<FeedScreen> {
+  late final StreamSubscription<Post> _postUpdates;
+
+  @override
+  void initState() {
+    super.initState();
+    _postUpdates = widget.stream.listen(_handlePost);
+  }
+
+  @override
+  void dispose() {
+    _postUpdates.cancel();
+    super.dispose();
+  }
+}
+```
+
+#### avoid_single_method_instance_field
+
+**Configuration in `analysis_options.yaml`:**
+```yaml
+custom_lint:
+  rules:
+    - avoid_single_method_instance_field:
         error_severity: Warning
 ```
 
@@ -410,13 +823,13 @@ class ProfileScreen extends StatelessWidget {
 }
 ```
 
-#### pure_build_methods
+#### avoid_impure_build_methods
 
 **Configuration in `analysis_options.yaml`:**
 ```yaml
 custom_lint:
   rules:
-    - pure_build_methods:
+    - avoid_impure_build_methods:
         error_severity: Error
 ```
 
@@ -447,13 +860,13 @@ class MyWidget extends StatelessWidget {
 }
 ```
 
-#### require_mounted_check_in_async_callbacks
+#### avoid_unsafe_context_call_in_async_callbacks
 
 **Configuration in `analysis_options.yaml`:**
 ```yaml
 custom_lint:
   rules:
-    - require_mounted_check_in_async_callbacks:
+    - avoid_unsafe_context_call_in_async_callbacks:
         error_severity: Error
 ```
 
